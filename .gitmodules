@@ -1,0 +1,6 @@
+[submodule "designer-front"]
+	path = designer-front
+	url = git@github.com:maemolol/designer-front.git
+[submodule "designer-back"]
+	path = designer-back
+	url = git@github.com:maemolol/designer-back.git
