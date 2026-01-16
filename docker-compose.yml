@@ -28,6 +28,7 @@ services:
   backend:
     container_name: backend
     image: backend:latest
+    env_file: .env
     build:
       context: ./designer-back
     depends_on:
@@ -36,10 +37,12 @@ services:
       mongo:
         condition: service_started
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      ConnectionStrings__Default: >
+        Host=${POSTGRES_HOST};
+        Port=${POSTGRES_PORT};
+        Database=esp32-server;
+        Username=${POSTGRES_USER};
+        Password=${POSTGRES_PASSWORD}
       MONGO_URI: ${MONGO_URI}
       JWT_KEY: ${JWT_KEY}
       JWT_ISSUER: ${JWT_ISSUER}
@@ -50,6 +53,25 @@ services:
       - "5000:5000"
     volumes:
       - ./backend/Data/Seed:/app/Data/Seed
+  
+  frontend:
+    container_name: frontend
+    build:
+      context: ./designer-front
+    depends_on:
+      backend:
+        condition: service_started
+      mongo:
+        condition: service_started
+    environment:
+      BACKEND_API: ${BACKEND_API}
+    ports:
+      - "3000:3000"
+  
+  cloudflare:
+    container_name: cloudflare
+    build:
+      context: ./designer-cloudflare
 
 volumes:
   pgdata:
