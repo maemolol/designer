@@ -1,5 +1,6 @@
 services:
   postgres:
+    container_name: designer-postgres
     image: postgres:17
     restart: always
     environment:
@@ -12,12 +13,13 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 5s
       timeout: 3s
       retries: 5
 
   mongo:
+    container_name: designer-mongo
     image: mongo:6
     restart: always
     ports:
@@ -26,7 +28,7 @@ services:
       - mongodata:/data/db
 
   backend:
-    container_name: backend
+    container_name: designer-backend
     image: backend:latest
     env_file: .env
     build:
@@ -38,11 +40,11 @@ services:
         condition: service_started
     environment:
       ConnectionStrings__Default: >
-        Host=${POSTGRES_HOST};
-        Port=${POSTGRES_PORT};
-        Database=esp32-server;
-        Username=${POSTGRES_USER};
-        Password=${POSTGRES_PASSWORD}
+        Host=${DB_HOST};
+        Port=${DB_PORT};
+        Database=designer;
+        Username=${DB_USER};
+        Password=${DB_PASSWORD}
       MONGO_URI: ${MONGO_URI}
       JWT_KEY: ${JWT_KEY}
       JWT_ISSUER: ${JWT_ISSUER}
@@ -55,7 +57,7 @@ services:
       - ./backend/Data/Seed:/app/Data/Seed
   
   frontend:
-    container_name: frontend
+    container_name: designer-frontend
     build:
       context: ./designer-front
     depends_on:
