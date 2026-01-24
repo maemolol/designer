@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-#      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker-backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -73,8 +73,6 @@ services:
         condition: service_started
     environment:
       BACKEND_API: ${BACKEND_API}
-    ports:
-      - "3000:3000"
     networks:
       - designnet
   
