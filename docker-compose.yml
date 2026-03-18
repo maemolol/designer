@@ -1,6 +1,5 @@
 services:
   postgres:
-    container_name: designer-postgres
     image: postgres:17
     restart: always
     environment:
@@ -11,7 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./docker-backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./designer-back/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -21,8 +20,12 @@ services:
       - designnet
 
   mongo:
-    container_name: designer-mongo
     image: mongo:6
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     restart: always
     ports:
       - "27017:27017"
@@ -32,7 +35,6 @@ services:
       - designnet
 
   backend:
-    container_name: designer-backend
     image: backend:latest
     env_file: .env
     build:
@@ -41,7 +43,7 @@ services:
       postgres:
         condition: service_healthy
       mongo:
-        condition: service_started
+        condition: service_healthy
     environment:
       ConnectionStrings__Default: >
         Host=${DB_HOST};
@@ -63,7 +65,6 @@ services:
       - designnet
   
   frontend:
-    container_name: designer-frontend
     build:
       context: ./designer-front
     depends_on:
