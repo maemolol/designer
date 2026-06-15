@@ -19,7 +19,7 @@ services:
       - designnet
 
   mongo:
-    image: mongo:6
+    image: mongo:8
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
       interval: 5s
@@ -56,10 +56,13 @@ services:
       JWT_AUDIENCE: ${JWT_AUDIENCE}
       JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      STRIPE__KEY: ${STRIPE__KEY}
+      UPLOAD_ROOT: ${UPLOAD_ROOT}
     ports:
       - "5000:5000"
     volumes:
       - ./backend/Data/Seed:/app/Data/Seed
+      - ./designer-back/Images:/app/Images
     networks:
       - designnet
   
